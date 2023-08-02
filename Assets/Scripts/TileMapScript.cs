@@ -1,31 +1,27 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine.Tilemaps;
 using UnityEngine;
 
 public class TileMapScript : MonoBehaviour
 {
-
     public Tilemap tileMap;
+    public int mapWidth = 50;
+    public int mapHeight = 50;
+    public float scale = 10f; // Scale of the noise
 
-    // Start is called before the first frame update
     void Start()
     {
-        int mapWidth = 50;
-        int mapHeight = 50;
-
         AnimatedTile tile1 = Resources.Load<AnimatedTile>("Tiles/Placeholder1");
         AnimatedTile tile2 = Resources.Load<AnimatedTile>("Tiles/Placeholder2");
-
 
         for (int x = 0; x < mapWidth; x++)
         {
             for (int y = 0; y < mapHeight; y++)
             {
+                // Generate Perlin noise value for each coordinate
+                float perlinValue = Mathf.PerlinNoise(x / scale, y / scale);
 
-                int randomNum = Random.Range(0, 1);
-
-                if (randomNum == 0)
+                // Use the Perlin noise value to choose between the two tiles
+                if (perlinValue < 0.5f)
                 {
                     tileMap.SetTile(new Vector3Int(x, y, 0), tile1);
                 }
@@ -40,6 +36,6 @@ public class TileMapScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }
