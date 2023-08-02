@@ -176,7 +176,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 215213ca03af6c34dbc1d67308735001, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -487,17 +487,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 647d34945ae034b8da5fb5000b322980, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tileMap: {fileID: 837160105}
-  maskTileMap: {fileID: 15690236}
   mapWidth: 50
   mapHeight: 50
   scale: 10
-  variationScale: 2
+  waterTileMap: {fileID: 15690236}
+  otherTileMap: {fileID: 837160105}
   waterTiles: []
   dirtTiles: []
   treeTiles: []
-  whiteTile: {fileID: 11400000, guid: 2dd5597701b3e6746bf4bd7f64c8d934, type: 2}
-  blackTile: {fileID: 11400000, guid: 9121ccd068cbb824a8ab77858a4e9074, type: 2}
 --- !u!483693784 &837160104
 TilemapRenderer:
   m_ObjectHideFlags: 0

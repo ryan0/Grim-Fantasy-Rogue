@@ -1,76 +1,62 @@
-using UnityEngine.Tilemaps;
 using UnityEngine;
+using UnityEngine.Tilemaps;
+using System.IO;
 
 public class TileMapScript : MonoBehaviour
 {
-    public Tilemap tileMap;
-    public Tilemap maskTileMap; // Reference to the mask Tilemap
     public int mapWidth = 50;
     public int mapHeight = 50;
     public float scale = 10f; // Scale of the noise
-    public float variationScale = 2f; // Scale for variations
 
-    public AnimatedTile[] waterTiles;
-    public AnimatedTile[] dirtTiles;
-    public AnimatedTile[] treeTiles;
+    public Tilemap waterTileMap;
+    public Tilemap otherTileMap;
 
-    public AnimatedTile whiteTile; // Reference to the white Tile used in the mask
-    public AnimatedTile blackTile; // Reference to the black Tile used in the mask
-
+    // We will use this 2D array to represent our tilemap
+    private int[,] tileData;
 
     void Start()
     {
-        // Load tiles dynamically, you can replace this with manual assignment in the Inspector
-        // The path should be consistent, e.g., "Tiles/WaterTile1", "Tiles/WaterTile2", etc.
-        LoadTiles(ref waterTiles, "Tiles/WaterTile", 1); // Assumes 3 water variations
-        LoadTiles(ref dirtTiles, "Tiles/DirtTile", 2); // Assumes 2 dirt variations
-        LoadTiles(ref treeTiles, "Tiles/TreeTile", 2); // Assumes 1 tree variation
-
+        // Generate the tile data
+        tileData = new int[mapWidth, mapHeight];
         for (int x = 0; x < mapWidth; x++)
         {
             for (int y = 0; y < mapHeight; y++)
             {
-                // Generate Perlin noise value for each coordinate
                 float perlinValue = Mathf.PerlinNoise(x / scale, y / scale);
-
-                AnimatedTile tileToPlace;
-
-                //set tile locations
                 if (perlinValue < 0.33f)
-                {
-                    tileToPlace = ChooseTile(waterTiles, x, y);
-                }
+                    tileData[x, y] = 1; // Water
                 else if (perlinValue < 0.66f)
-                {
-                    tileToPlace = ChooseTile(dirtTiles, x, y);
-                }
+                    tileData[x, y] = 2; // Dirt
                 else
-                {
-                    tileToPlace = ChooseTile(treeTiles, x, y);
-                }
+                    tileData[x, y] = 3; // Tree
+            }
+        }
 
-                //set mask tilemap for water
-                // Set the corresponding mask tile based on the Perlin noise value
-                if (perlinValue < 0.33f)
-                {
-                    maskTileMap.SetTile(new Vector3Int(x, y, 0), whiteTile); // White where water is
-                }
-                else
-                {
-                    maskTileMap.SetTile(new Vector3Int(x, y, 0), blackTile); // Black elsewhere
-                }
+        // Save to CSV
+        SaveToCSV(tileData, "tilemap.csv");
 
-                tileMap.SetTile(new Vector3Int(x, y, 0), tileToPlace);
+        LoadTilemaps();
+    }
+
+    void SaveToCSV(int[,] data, string filename)
+    {
+        using (StreamWriter writer = new StreamWriter(filename))
+        {
+            for (int y = 0; y < mapHeight; y++)
+            {
+                for (int x = 0; x < mapWidth; x++)
+                {
+                    writer.Write(data[x, y]);
+                    if (x < mapWidth - 1) writer.Write(",");
+                }
+                writer.WriteLine();
             }
         }
     }
 
-    AnimatedTile ChooseTile(AnimatedTile[] tiles, int x, int y)
-    {
-        float variationValue = Mathf.PerlinNoise(x / variationScale, y / variationScale);
-        int index = Mathf.FloorToInt(variationValue * tiles.Length);
-        return tiles[index];
-    }
+    public AnimatedTile[] waterTiles;
+    public AnimatedTile[] dirtTiles;
+    public AnimatedTile[] treeTiles;
 
     void LoadTiles(ref AnimatedTile[] tiles, string basePath, int count)
     {
@@ -81,9 +67,55 @@ public class TileMapScript : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    void LoadTilemaps()
     {
+        string filename = "tilemap.csv";
+        string[] lines = File.ReadAllLines(filename);
 
+        LoadTiles(ref waterTiles, "Tiles/WaterTile", 1); // Assumes 3 water variations
+        LoadTiles(ref dirtTiles, "Tiles/DirtTile", 2); // Assumes 2 dirt variations
+        LoadTiles(ref treeTiles, "Tiles/TreeTile", 2); // Assumes 1 tree variation
+
+        for (int y = 0; y < mapHeight; y++)
+        {
+            string[] values = lines[y].Split(',');
+            for (int x = 0; x < mapWidth; x++)
+            {
+                int tileType = int.Parse(values[x]);
+                Vector3Int position = new Vector3Int(x, y, 0);
+
+                AnimatedTile tileToPlace = ChooseTileByType(tileType, x, y);
+                if (tileType == 1) // Water
+                    waterTileMap.SetTile(position, tileToPlace);
+                else
+                    otherTileMap.SetTile(position, tileToPlace);
+            }
+        }
     }
+
+    AnimatedTile ChooseTileByType(int tileType, int x, int y)
+    {
+        float variationValue = Mathf.PerlinNoise(x / scale, y / scale);
+        AnimatedTile[] tiles;
+
+        switch (tileType)
+        {
+            case 1:
+                tiles = waterTiles;
+                break;
+            case 2:
+                tiles = dirtTiles;
+                break;
+            case 3:
+                tiles = treeTiles;
+                break;
+            default:
+                return null; // Return null or a default tile if an invalid type is encountered
+        }
+
+        int index = Mathf.FloorToInt(variationValue * tiles.Length);
+        return tiles[index];
+    }
+
+
 }

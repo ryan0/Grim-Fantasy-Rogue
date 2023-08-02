@@ -3,8 +3,10 @@ Shader "Custom/WaterShimmer"
     Properties
     {
         _MainTex("Texture", 2D) = "white" {}
-        _MaskTex("Mask", 2D) = "white" {}
         _ShimmerAmount("Shimmer Amount", Range(0,1)) = 0.5
+        _ShimmerSpeed("Shimmer Speed", float) = 1.0
+        _NoiseScale("Noise Scale", float) = 10.0
+        _PixelsPerUnit("Pixels Per Unit", float) = 16.0
     }
         SubShader
         {
@@ -29,9 +31,10 @@ Shader "Custom/WaterShimmer"
                 };
 
                 sampler2D _MainTex;
-                sampler2D _MaskTex;
                 float _ShimmerAmount;
-                float _Time;
+                float _ShimmerSpeed;
+                float _NoiseScale;
+                float _PixelsPerUnit;
 
                 v2f vert(appdata v)
                 {
@@ -43,10 +46,15 @@ Shader "Custom/WaterShimmer"
 
                 half4 frag(v2f i) : SV_Target
                 {
+                    float2 pixelUV = i.uv * _PixelsPerUnit;
+                    float noiseInput = frac(sin(dot(pixelUV, float2(12.9898,78.233))) * 43758.5453);
+                    noiseInput *= _NoiseScale;
+                    noiseInput += _Time.y * _ShimmerSpeed;
+                    float shimmer = _ShimmerAmount * frac(sin(noiseInput * 6.2831));
+
                     half4 color = tex2D(_MainTex, i.uv);
-                    half4 mask = tex2D(_MaskTex, i.uv);
-                    float shimmer = sin(_Time.y * 2.0) * _ShimmerAmount;
-                    color.rgb += mask.rgb * shimmer;
+                    color.rgb += step(shimmer, 0.5); // Turns individual pixels to white based on threshold
+
                     return color;
                 }
                 ENDCG
