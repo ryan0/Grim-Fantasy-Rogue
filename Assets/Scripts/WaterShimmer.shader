@@ -40,20 +40,20 @@ Shader "Custom/WaterShimmer"
                 {
                     v2f o;
                     o.vertex = UnityObjectToClipPos(v.vertex);
-                    o.uv = v.uv;
+                    o.uv = v.uv * _PixelsPerUnit; // Scale UV by pixels per unit
                     return o;
                 }
 
                 half4 frag(v2f i) : SV_Target
                 {
-                    float2 pixelUV = i.uv * _PixelsPerUnit;
+                    float2 pixelUV = i.uv;
                     float noiseInput = frac(sin(dot(pixelUV, float2(12.9898,78.233))) * 43758.5453);
                     noiseInput *= _NoiseScale;
                     noiseInput += _Time.y * _ShimmerSpeed;
-                    float shimmer = _ShimmerAmount * frac(sin(noiseInput * 6.2831));
+                    float shimmer = frac(sin(noiseInput * 6.2831));
 
-                    half4 color = tex2D(_MainTex, i.uv);
-                    color.rgb += step(shimmer, 0.5); // Turns individual pixels to white based on threshold
+                    half4 color = tex2D(_MainTex, i.uv / _PixelsPerUnit); // Scale UV back to normal
+                    color.rgb += step(1.0 - _ShimmerAmount, shimmer); // Adjusting threshold based on shimmer amount
 
                     return color;
                 }
