@@ -1,13 +1,13 @@
 {
     "TileDataArray": [
         {
-            "Type": 2,
-            "Motes": 5,
+            "Type": 1,
+            "Motes": 2,
             "Height": 0
         },
         {
-            "Type": 2,
-            "Motes": 5,
+            "Type": 1,
+            "Motes": 2,
             "Height": 0
         },
         {
@@ -251,13 +251,13 @@
             "Height": 0
         },
         {
-            "Type": 2,
-            "Motes": 5,
+            "Type": 1,
+            "Motes": 2,
             "Height": 0
         },
         {
-            "Type": 2,
-            "Motes": 5,
+            "Type": 1,
+            "Motes": 2,
             "Height": 0
         },
         {
@@ -756,13 +756,13 @@
             "Height": 0
         },
         {
-            "Type": 2,
-            "Motes": 5,
+            "Type": 1,
+            "Motes": 2,
             "Height": 0
         },
         {
-            "Type": 2,
-            "Motes": 5,
+            "Type": 1,
+            "Motes": 2,
             "Height": 0
         },
         {

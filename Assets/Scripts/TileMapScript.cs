@@ -2,20 +2,6 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.IO;
 
-[System.Serializable]
-public class TileData
-{
-    public int Type; // Tile type (1 for water, 2 for dirt, 3 for tree, etc.)
-    public int Motes; // motes ranging from 1 to 100
-    public int Height; // Height ranging from -100, to -2, to 2
-
-    public TileData(int type, int motes, int height)
-    {
-        Type = type;
-        Motes = motes;
-        Height = height;
-    }
-}
 
 
 public class TileMapScript : MonoBehaviour
@@ -67,6 +53,9 @@ public class TileMapScript : MonoBehaviour
 
         LoadTilemaps();
     }
+
+
+    /// Draw tile methods
 
     public AnimatedTile[] waterTiles;
     public AnimatedTile[] dirtTiles;
@@ -125,6 +114,9 @@ public class TileMapScript : MonoBehaviour
         int index = Mathf.FloorToInt(variationValue * tiles.Length);
         return tiles[index];
     }
+
+    /// Json methods
+
     void SaveToJson()
     {
         TileData[] flatArray = new TileData[mapWidth * mapHeight];
@@ -163,13 +155,29 @@ public class TileMapScript : MonoBehaviour
         }
     }
 
-
-   [System.Serializable]
-    public class TileDataList
+    /// Mutate tile methods
+    // 1. Changing Particular Tile Fields
+    public void ChangeTileData(int x, int y, int newType, int newMotes, int newHeight)
     {
-        public TileData[] TileDataArray; // Changed to a field, not a property
+        if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight)
+        {
+            tileDataMatrix[x, y].Type = newType;
+            tileDataMatrix[x, y].Motes = newMotes;
+            tileDataMatrix[x, y].Height = newHeight;
+        }
     }
-
+    // 2.) Debugging
+    public int debugX;
+    public int debugY;
+    public int debugNewType;
+    public int debugNewMotes;
+    public int debugNewHeight;
+    public void DebugApplyChanges()
+    {
+        ChangeTileData(debugX, debugY, debugNewType, debugNewMotes, debugNewHeight);
+        LoadTilemaps();
+        SaveToJson();
+    }
 
 
 }

@@ -76,20 +76,20 @@ Material:
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
-    - _DistortionScale: 0.1
+    - _DistortionScale: 0.05
     - _DstBlend: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _Metallic: 0
     - _Mode: 0
-    - _NoiseScale: 5
+    - _NoiseScale: 0.1
     - _OcclusionStrength: 1
     - _PPU: 64
     - _Parallax: 0.02
     - _PixelsPerUnit: 64
     - _ReflectionAmount: 0.5
-    - _ShimmerAmount: 0.85
+    - _ShimmerAmount: 0.186
     - _ShimmerFrequency: 3
     - _ShimmerSpeed: 0.1
     - _ShimmerStrength: 1
