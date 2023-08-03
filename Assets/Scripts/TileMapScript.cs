@@ -1,7 +1,19 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.IO;
+public class TileData
+{
+    public int Type { get; set; } // Tile type (1 for water, 2 for dirt, 3 for tree, etc.)
+    public int Motes { get; set; } // motes ranging from 1 to 100
+    public int Height { get; set; } // Height ranging from -100, to -2, to 2
 
+    public TileData(int type, int motes, int height)
+    {
+        Type = type;
+        Motes = motes;
+        Height = height;
+    }
+}
 public class TileMapScript : MonoBehaviour
 {
     public int mapWidth = 50;
@@ -12,28 +24,35 @@ public class TileMapScript : MonoBehaviour
     public Tilemap otherTileMap;
 
     // We will use this 2D array to represent our tilemap
-    private int[,] tileData;
+    private TileData[,] tileDataMatrix; // Matrix of TileData objects
 
     void Start()
     {
         // Generate the tile data
-        tileData = new int[mapWidth, mapHeight];
+        int[,] initTiles = new int[mapWidth, mapHeight];
+        tileDataMatrix = new TileData[mapWidth, mapHeight];
         for (int x = 0; x < mapWidth; x++)
         {
             for (int y = 0; y < mapHeight; y++)
             {
                 float perlinValue = Mathf.PerlinNoise(x / scale, y / scale);
+                int tileType;
+                int motes = 5;
+                int height = 0;
+
                 if (perlinValue < 0.33f)
-                    tileData[x, y] = 1; // Water
+                    tileType = 1; // Water
                 else if (perlinValue < 0.66f)
-                    tileData[x, y] = 2; // Dirt
+                    tileType = 2; // Dirt
                 else
-                    tileData[x, y] = 3; // Tree
+                    tileType = 3; // Tree
+                initTiles[x, y] = tileType;
+                tileDataMatrix[x, y] = new TileData(tileType, motes, height);
             }
         }
 
         // Save to CSV
-        SaveToCSV(tileData, "tilemap.csv");
+        SaveToCSV(initTiles, "tilemap.csv");
 
         LoadTilemaps();
     }
