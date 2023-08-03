@@ -56,36 +56,38 @@ Shader "Custom/WaterShimmer"
                     return o;
                 }
 
-                half4 frag(v2f i) : SV_Target
-                {
-                    float2 pixelUV = i.uv / _PixelsPerUnit;
+half4 frag(v2f i) : SV_Target
+{
+    float2 pixelUV = i.uv / _PixelsPerUnit;
 
-                    // Ripple distortion
-                    float2 noiseOffset = tex2D(_NoiseTex, pixelUV * 0.1 + _Time.y).rg * 2.0 - 1.0;
-                    noiseOffset *= _DistortionScale;
-                    pixelUV += noiseOffset;
+    // Continuous ripple distortion
+    float timeEffect = frac(_Time.y * _ShimmerSpeed); // Wraps the timeEffect in a range of 0-1
+    float2 noiseCoord = pixelUV * 0.1 + float2(timeEffect, timeEffect);
+    float2 noiseOffset = tex2D(_NoiseTex, noiseCoord).rg * 2.0 - 1.0;
+    noiseOffset *= _DistortionScale;
+    pixelUV += noiseOffset;
 
-                    float noiseInput = frac(sin(dot(pixelUV * 0.1, float2(12.9898,78.233))) * 43758.5453);
-                    noiseInput *= _NoiseScale;
-                    noiseInput += _Time.y * _ShimmerSpeed;
-                    float shimmer = smoothstep(0.45, 0.55, sin(noiseInput * 6.2831));
+    float noiseInput = frac(sin(dot(pixelUV * 0.1, float2(12.9898,78.233))) * 43758.5453);
+    noiseInput *= _NoiseScale;
+    float shimmer = smoothstep(0.45, 0.55, sin(noiseInput * 6.2831));
 
-                    half4 color = tex2D(_MainTex, pixelUV);
-                    color.rgb += shimmer * _ShimmerAmount;
+    half4 color = tex2D(_MainTex, pixelUV);
+    color.rgb += shimmer * _ShimmerAmount;
 
-                    float3 worldPos = mul(unity_ObjectToWorld, i.vertex).xyz;
-                    float3 toCamera = _WorldSpaceCameraPos - worldPos;
-                    float2 reflectionUV = float2(dot(toCamera, _WorldRight), dot(toCamera, _WorldUp));
-                    reflectionUV /= _PixelsPerUnit;
-                    reflectionUV *= float2(0.1, 0.1);
-                    reflectionUV = reflectionUV - floor(reflectionUV);
-                    reflectionUV += noiseOffset; // Apply the same distortion to reflection
-                    half4 reflectionColor = tex2D(_ReflectionTex, reflectionUV);
+    float3 worldPos = mul(unity_ObjectToWorld, i.vertex).xyz;
+    float3 toCamera = _WorldSpaceCameraPos - worldPos;
+    float2 reflectionUV = float2(dot(toCamera, _WorldRight), dot(toCamera, _WorldUp));
+    reflectionUV /= _PixelsPerUnit;
+    reflectionUV *= float2(0.1, 0.1);
+    reflectionUV = frac(reflectionUV); // Wraps the UV coordinates
+    reflectionUV += noiseOffset; // Apply the same distortion to reflection
+    half4 reflectionColor = tex2D(_ReflectionTex, reflectionUV);
 
-                    color.rgb = lerp(color.rgb, reflectionColor.rgb, _ReflectionAmount);
+    color.rgb = lerp(color.rgb, reflectionColor.rgb, _ReflectionAmount);
 
-                    return color;
-                }
+    return color;
+}
+
                 ENDCG
             }
         }

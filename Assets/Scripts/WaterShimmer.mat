@@ -55,6 +55,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _NoiseTex:
+        m_Texture: {fileID: 2800000, guid: af80772b0f59e464aadfa7437a8d83da, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -63,11 +67,16 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _ReflectionTex:
+        m_Texture: {fileID: 2800000, guid: 81a9a018921105a429f53601e7135a6c, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
+    - _DistortionScale: 0.1
     - _DstBlend: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
@@ -79,9 +88,10 @@ Material:
     - _PPU: 64
     - _Parallax: 0.02
     - _PixelsPerUnit: 64
-    - _ShimmerAmount: 1
+    - _ReflectionAmount: 0.5
+    - _ShimmerAmount: 0.85
     - _ShimmerFrequency: 3
-    - _ShimmerSpeed: 0.5
+    - _ShimmerSpeed: 0.1
     - _ShimmerStrength: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -91,4 +101,6 @@ Material:
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _WorldRight: {r: 1, g: 0, b: 0, a: 0}
+    - _WorldUp: {r: 0, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []
