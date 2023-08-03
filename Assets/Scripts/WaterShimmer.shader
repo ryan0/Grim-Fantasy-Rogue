@@ -3,10 +3,16 @@ Shader "Custom/WaterShimmer"
     Properties
     {
         _MainTex("Texture", 2D) = "white" {}
+        _ReflectionTex("Reflection Texture", 2D) = "white" {}
+        _NoiseTex("Noise Texture", 2D) = "white" {}
         _ShimmerAmount("Shimmer Amount", Range(0,1)) = 0.5
+        _ReflectionAmount("Reflection Amount", Range(0,1)) = 0.5
         _ShimmerSpeed("Shimmer Speed", float) = 1.0
+        _DistortionScale("Distortion Scale", float) = 0.1
         _NoiseScale("Noise Scale", float) = 10.0
         _PixelsPerUnit("Pixels Per Unit", float) = 16.0
+        _WorldRight("World Right", Vector) = (1,0,0,0)
+        _WorldUp("World Up", Vector) = (0,1,0,0)
     }
         SubShader
         {
@@ -26,34 +32,57 @@ Shader "Custom/WaterShimmer"
 
                 struct v2f
                 {
-                    float2 uv : TEXCOORD0;
                     float4 vertex : SV_POSITION;
+                    float2 uv : TEXCOORD0;
                 };
 
                 sampler2D _MainTex;
+                sampler2D _ReflectionTex;
+                sampler2D _NoiseTex;
                 float _ShimmerAmount;
+                float _ReflectionAmount;
                 float _ShimmerSpeed;
+                float _DistortionScale;
                 float _NoiseScale;
                 float _PixelsPerUnit;
+                float4 _WorldRight;
+                float4 _WorldUp;
 
                 v2f vert(appdata v)
                 {
                     v2f o;
                     o.vertex = UnityObjectToClipPos(v.vertex);
-                    o.uv = v.uv * _PixelsPerUnit; // Scale UV by pixels per unit
+                    o.uv = v.uv * _PixelsPerUnit;
                     return o;
                 }
 
                 half4 frag(v2f i) : SV_Target
                 {
-                    float2 pixelUV = i.uv;
-                    float noiseInput = frac(sin(dot(pixelUV, float2(12.9898,78.233))) * 43758.5453);
+                    float2 pixelUV = i.uv / _PixelsPerUnit;
+
+                    // Ripple distortion
+                    float2 noiseOffset = tex2D(_NoiseTex, pixelUV * 0.1 + _Time.y).rg * 2.0 - 1.0;
+                    noiseOffset *= _DistortionScale;
+                    pixelUV += noiseOffset;
+
+                    float noiseInput = frac(sin(dot(pixelUV * 0.1, float2(12.9898,78.233))) * 43758.5453);
                     noiseInput *= _NoiseScale;
                     noiseInput += _Time.y * _ShimmerSpeed;
-                    float shimmer = frac(sin(noiseInput * 6.2831));
+                    float shimmer = smoothstep(0.45, 0.55, sin(noiseInput * 6.2831));
 
-                    half4 color = tex2D(_MainTex, i.uv / _PixelsPerUnit); // Scale UV back to normal
-                    color.rgb += step(1.0 - _ShimmerAmount, shimmer); // Adjusting threshold based on shimmer amount
+                    half4 color = tex2D(_MainTex, pixelUV);
+                    color.rgb += shimmer * _ShimmerAmount;
+
+                    float3 worldPos = mul(unity_ObjectToWorld, i.vertex).xyz;
+                    float3 toCamera = _WorldSpaceCameraPos - worldPos;
+                    float2 reflectionUV = float2(dot(toCamera, _WorldRight), dot(toCamera, _WorldUp));
+                    reflectionUV /= _PixelsPerUnit;
+                    reflectionUV *= float2(0.1, 0.1);
+                    reflectionUV = reflectionUV - floor(reflectionUV);
+                    reflectionUV += noiseOffset; // Apply the same distortion to reflection
+                    half4 reflectionColor = tex2D(_ReflectionTex, reflectionUV);
+
+                    color.rgb = lerp(color.rgb, reflectionColor.rgb, _ReflectionAmount);
 
                     return color;
                 }
