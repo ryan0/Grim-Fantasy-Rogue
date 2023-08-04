@@ -26,6 +26,7 @@ public class CharacterMovement : MonoBehaviour
             if (Vector3.Distance(transform.position, targetPosition) < 0.001f)
             {
                 isMoving = false;
+
             }
         }
         else
