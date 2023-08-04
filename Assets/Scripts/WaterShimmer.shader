@@ -60,9 +60,10 @@ half4 frag(v2f i) : SV_Target
 {
     float2 pixelUV = i.uv / _PixelsPerUnit;
 
-    // Continuous ripple distortion
-    float timeEffect = frac(_Time.y * _ShimmerSpeed); // Wraps the timeEffect in a range of 0-1
+    // Using a fraction of _Time.y to control the looping
+    float timeEffect = frac(_Time.y * _ShimmerSpeed * 0.5); // Adjust 0.5 to control how fast it loops
     float2 noiseCoord = pixelUV * 0.1 + float2(timeEffect, timeEffect);
+    noiseCoord = frac(noiseCoord * 0.99); // Wraps the UV coordinates; adjust 0.5 to control the tiling
     float2 noiseOffset = tex2D(_NoiseTex, noiseCoord).rg * 2.0 - 1.0;
     noiseOffset *= _DistortionScale;
     pixelUV += noiseOffset;
@@ -73,6 +74,7 @@ half4 frag(v2f i) : SV_Target
 
     half4 color = tex2D(_MainTex, pixelUV);
     color.rgb += shimmer * _ShimmerAmount;
+
 
     float3 worldPos = mul(unity_ObjectToWorld, i.vertex).xyz;
     float3 toCamera = _WorldSpaceCameraPos - worldPos;
