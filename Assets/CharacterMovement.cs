@@ -1,19 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CharacterMovement : MonoBehaviour
 {
-    public float moveSpeed = 0.5f; // Speed at which the character moves
+    public float moveSpeed = 5f; // Speed of the movement
     private bool isMoving;
     private Vector3 targetPosition;
-    private TileData[,] tileDataMatrix; // Reference to your tile data matrix
-    public int mapWidth = 50;
-    public int mapHeight = 50;
+
+    private TileMapGenerator tileMapGenerator;
 
     private void Start()
     {
-        tileDataMatrix = TileMapGenerator.tileDataMatrix;
+        tileMapGenerator = FindObjectOfType<TileMapGenerator>();
     }
 
     private void Update()
@@ -22,13 +19,14 @@ public class CharacterMovement : MonoBehaviour
         {
             float step = moveSpeed * Time.deltaTime;
             transform.position = Vector3.MoveTowards(transform.position, targetPosition, step);
+            Debug.Log($"Moving from {transform.position} to {targetPosition}");
 
             if (Vector3.Distance(transform.position, targetPosition) < 0.001f)
             {
                 isMoving = false;
-
             }
         }
+
         else
         {
             Move();
@@ -40,22 +38,29 @@ public class CharacterMovement : MonoBehaviour
         int xDir = 0;
         int yDir = 0;
 
-        if (Input.GetKeyDown(KeyCode.UpArrow)) yDir = 1;
-        if (Input.GetKeyDown(KeyCode.DownArrow)) yDir = -1;
-        if (Input.GetKeyDown(KeyCode.LeftArrow)) xDir = -1;
-        if (Input.GetKeyDown(KeyCode.RightArrow)) xDir = 1;
+        if (Input.GetKey(KeyCode.UpArrow))
+            yDir = 1;
+        else if (Input.GetKey(KeyCode.DownArrow))
+            yDir = -1;
+        else if (Input.GetKey(KeyCode.LeftArrow))
+            xDir = -1;
+        else if (Input.GetKey(KeyCode.RightArrow))
+            xDir = 1;
+
+        Debug.Log($"Input detected: xDir = {xDir}, yDir = {yDir}");
 
         if (xDir != 0 || yDir != 0)
         {
-            int x = Mathf.FloorToInt(transform.position.x) + xDir;
-            int y = Mathf.FloorToInt(transform.position.y) + yDir;
+            int x = Mathf.RoundToInt(transform.position.x) + xDir;
+            int y = Mathf.RoundToInt(transform.position.y) + yDir;
 
-            if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight && tileDataMatrix[x, y].CanWalk)
+            if (x >= 0 && x < tileMapGenerator.mapWidth && y >= 0 && y < tileMapGenerator.mapHeight &&
+                TileMapGenerator.tileDataMatrix[x, y].CanWalk)
             {
                 targetPosition = new Vector3(x, y, transform.position.z);
                 isMoving = true;
             }
         }
     }
-}
 
+}
